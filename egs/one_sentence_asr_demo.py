@@ -6,6 +6,7 @@ import threading
 import mtasr
 
 
+# change the url if necessary
 url = "101.200.38.222:52732"
 
 
