@@ -2,11 +2,10 @@ import time
 import json
 import wave
 import uuid
-from loguru import logger as LOGGER
 import mtasr
 
 
-url = "aidev.mthreads.com:31479"
+url = "101.200.38.222:52732"
 
 
 def slice_data(data, chunk_size):
@@ -73,7 +72,7 @@ class RealTimeASR():
 if __name__ == '__main__':
     # TODO
     file_path = "demo.wav"
-    # file_path = "../../Downloads/test_1.wav"
     client = RealTimeASR(url)
     client.send(file_path)
     client.close()
+
