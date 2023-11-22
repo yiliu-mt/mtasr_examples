@@ -8,6 +8,8 @@ import mtasr
 
 # change the url if necessary
 url = "101.200.38.222:52732"
+# enter your token here
+token = None
 
 
 def slice_data(data, chunk_size):
@@ -21,10 +23,11 @@ def slice_data(data, chunk_size):
 
 
 class OneSentenceASR():
-    def __init__(self, url):
+    def __init__(self, url, token):
         self.url = url
         self.client = mtasr.OneSentenceClient(
             url=self.url,
+            token=token,
             req_id=uuid.uuid4().hex,
             nbest=1,
             on_start=self.test_on_start,
@@ -78,7 +81,7 @@ class OneSentenceASR():
 if __name__ == '__main__':
     # TODO
     file_path = "demo.wav"
-    client = OneSentenceASR(url)
+    client = OneSentenceASR(url, token)
     client.send(file_path)
     client.close()
 
