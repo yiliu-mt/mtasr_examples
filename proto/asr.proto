@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package asr.v1;
+
+option java_package = "com.mthreads.ai.protos.asr.v1";
+
+// Service that implements ASR
+service ASR {
+  // The details of the communication is described in: https://confluence.mthreads.com/pages/viewpage.action?pageId=83871842
+
+  // ASR in one sentence case. It will STOP recognition after the very first endpoint.
+  rpc OneSentenceSpeechRecognition (stream Request) returns (stream Response) {};
+
+  // Real-time streaming recognition. It will CONTINUE recognition after each endpoint.
+  rpc RealTimeSpeechRecognition (stream Request) returns (stream Response) {};
+}
+
+// Next ID: 3
+message Request {
+ 
+  // Next ID: 3
+  message DecodeConfig {
+    // The request ID. It is recommend to use UUID.
+    string req_id = 1;
+
+    // The recogntion result will include nbest candidates.
+    int32 nbest = 2;
+  }
+
+  oneof payload {
+    // decode_config is used in the first request
+    DecodeConfig decode_config = 1;
+
+    // After the first request, audio_data will be sended.
+    bytes audio_data = 2;
+  }
+}
+
+// Next ID: 3
+message OneBest {
+  // The recognized text.
+  string sentence = 1;
+
+  // The words in the recognized text.
+  repeated OnePiece wordpieces = 2;
+}
+
+// Next ID: 4
+message OnePiece {
+  // The recognized text
+  string word = 1;
+
+  // The start time of this word (in millisecond).
+  int32 start = 2;
+
+  // The end time of this word (in millisecond).
+  int32 end = 3;
+}
+
+// Next ID: 3
+message Response {
+
+  // Next ID: 3
+  message Header {
+    // The current status of the current connection.
+    Status status = 1;
+
+    // The stage of the current connection.
+    Type type = 2;
+  }
+
+  enum Status {
+    // default status
+    UNKNOWN_STATUS = 0;
+
+    // Every thing all right.
+    OK = 1;
+
+    // We may use more specific failure status in the future.
+    // For now, we only use a failed flag.
+    FAILED = 2;
+  }
+
+  enum Type {
+    // default type
+    UNKNOWN_TYPE = 0;
+
+    // New text is recognized.
+    SENTENCE_CHANGED = 1;
+
+    // The sentence is ended.
+    SENTENCE_END = 2;
+
+    // The entire recogntion request is completed.
+    COMPLETED = 3;
+  }
+
+  // Next ID: 3
+  message Payload {
+    // A list which contains the nbest result of each sentence.
+    repeated OneBest result = 1;
+
+    // Reserved:
+    // In some case, in the end of the recognition, the entire recognized text will be concatenated.
+    // Not implemented at this moment
+    string text = 2;
+  }
+
+  // The header contains some meta data.
+  Header header = 1;
+
+  // The recognized result will saved in the payload.
+  Payload payload = 2;
+}

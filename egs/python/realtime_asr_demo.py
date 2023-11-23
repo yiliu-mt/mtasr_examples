@@ -2,7 +2,6 @@ import time
 import json
 import wave
 import uuid
-import threading
 import mtasr
 
 
@@ -22,10 +21,10 @@ def slice_data(data, chunk_size):
         yield data[offset: data_len]
 
 
-class OneSentenceASR():
+class RealTimeASR():
     def __init__(self, url, token):
         self.url = url
-        self.client = mtasr.OneSentenceClient(
+        self.client = mtasr.RealTimeClient(
             url=self.url,
             token=token,
             req_id=uuid.uuid4().hex,
@@ -36,7 +35,6 @@ class OneSentenceASR():
             on_completed=self.test_on_completed,
             on_error=self.test_on_error
         )
-        self.sentence_end = threading.Event()
 
     def test_on_start(self, message, **_kwargs):
         print("test_on_start: {}".format(message))
@@ -45,7 +43,6 @@ class OneSentenceASR():
         print("test_on_chg: {}. Result: {}".format(message, json.dumps(result, ensure_ascii=False)))
 
     def test_on_sentence_end(self, message, result, **_kwargs):
-        self.sentence_end.set()
         print("test_on_sentence_end: {}. Result: {}".format(message, json.dumps(result, ensure_ascii=False)))
 
     def test_on_completed(self, message, *args):
@@ -61,16 +58,19 @@ class OneSentenceASR():
         assert framerate == 16000 and sampwidth == 2, "Only support 16K 16bit wav"
 
         # each chunk contains 160ms
-        num_bytes = int(0.160 * 16000 * 2)
+        chunk_size = 0.160
+        num_bytes = int(chunk_size * 16000 * 2)
         index = 0
         while True:
             self.client.send(wave_bytes[index:index + num_bytes])
             index += num_bytes
-            # TODO
-            time.sleep(0.01)
+
+            # Note: If you want to simulate the process of a practical application,
+            # you can change the following line to:
+            # time.sleep(chunk_size)
+            time.sleep(0.001)
+
             if index > len(wave_bytes):
-                break
-            if self.sentence_end.is_set():
                 break
         self.client.stop()
 
@@ -81,7 +81,7 @@ class OneSentenceASR():
 if __name__ == '__main__':
     # TODO
     file_path = "demo.wav"
-    client = OneSentenceASR(url, token)
+    client = RealTimeASR(url, token)
     client.send(file_path)
     client.close()
 
