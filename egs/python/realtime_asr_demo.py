@@ -6,10 +6,13 @@ import mtasr
 
 
 # change the url if necessary
-url = "101.200.38.222:52732"
+url = "api.mthreads.com:53966"
 # enter your token here
-token = None
+token = "mtbY5pkYqpKZ5sOqt6xJ2ev15eCPyLauiSk0yS2SPfjtITCeQ3ksYygqeE5WBexKA1"
 
+
+# The final result that concatenates all sentences together
+final_result = ""
 
 def slice_data(data, chunk_size):
     data_len = len(data)
@@ -43,7 +46,11 @@ class RealTimeASR():
         print("test_on_chg: {}. Result: {}".format(message, json.dumps(result, ensure_ascii=False)))
 
     def test_on_sentence_end(self, message, result, **_kwargs):
+        global final_result
         print("test_on_sentence_end: {}. Result: {}".format(message, json.dumps(result, ensure_ascii=False)))
+        # concatenate all sentences
+        if len(result[0]['sentence']) > 0:
+            final_result += result[0]['sentence'] + '。'
 
     def test_on_completed(self, message, *args):
         print("on_completed: {}".format(message))
@@ -79,9 +86,10 @@ class RealTimeASR():
 
 
 if __name__ == '__main__':
-    # TODO
+    # 在此使用您的音频
     file_path = "demo.wav"
     client = RealTimeASR(url, token)
     client.send(file_path)
     client.close()
+    print('整体识别结果:\n{}'.format(final_result))
 
