@@ -9,7 +9,7 @@ import mtasr
 # change the url if necessary
 url = "api.mthreads.com:53966"
 # enter your token here
-token = "mtbY5pkYqpKZ5sOqt6xJ2ev15eCPyLauiSk0yS2SPfjtITCeQ3ksYygqeE5WBexKA1"
+token = ""
 
 
 # The final result that concatenates all sentences together
