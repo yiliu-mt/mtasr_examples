@@ -8,7 +8,7 @@ import websocket
 from functools import partial
 from threading import Thread
 
-URL = "ws://api.mthreads.com/api/v1/asr"
+URL = "wss://api.mthreads.com/api/v1/asr"
 
 # 鉴权token
 TOKEN = None
