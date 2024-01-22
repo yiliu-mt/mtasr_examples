@@ -10,6 +10,11 @@ url = "api.mthreads.com:53966"
 # enter your token here
 token = ""
 
+# 在此使用您的音频
+file_path = "demo.wav"
+
+# The final result that concatenates all sentences together
+final_result = ""
 
 # The final result that concatenates all sentences together
 final_result = ""
@@ -68,7 +73,7 @@ class RealTimeASR():
         chunk_size = 0.160
         num_bytes = int(chunk_size * 16000 * 2)
         index = 0
-        while True:
+        while index < len(wave_bytes):
             self.client.send(wave_bytes[index:index + num_bytes])
             index += num_bytes
 
@@ -76,9 +81,6 @@ class RealTimeASR():
             # you can change the following line to:
             # time.sleep(chunk_size)
             time.sleep(0.001)
-
-            if index > len(wave_bytes):
-                break
         self.client.stop()
 
     def close(self):
@@ -86,8 +88,6 @@ class RealTimeASR():
 
 
 if __name__ == '__main__':
-    # 在此使用您的音频
-    file_path = "demo.wav"
     client = RealTimeASR(url, token)
     client.send(file_path)
     client.close()
