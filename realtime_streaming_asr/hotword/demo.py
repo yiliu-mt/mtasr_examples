@@ -94,7 +94,7 @@ def list_all_vocabularies(endpoint, token):
     try:
         print("List all vocabularies: code {}".format(response.status_code))
         print(response.text)
-        return json.loads(response.text)["vocabulary_ids"]
+        return json.loads(response.text)["vocabulary_list"]
     except:
         return None
 

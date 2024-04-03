@@ -10,7 +10,7 @@ This is the official API that contains the whole ASR pipeline.
 
 * Inverse text normalization (ITN)
 * Chinese punctuation
-* Session-level hotwords (optional when starting a ASR connection)
+* Hotwords (optional when starting a ASR connection)
 
 [WebSocket client](https://github.com/yiliu-mt/mtasr_examples/tree/main/realtime_streaming_asr)
 

@@ -69,9 +69,9 @@ The output of the demo will look something like this:
     整体识别结果:
     你好欢迎使用摩尔线程语音识别。
 
-## Session-level hotword
+## Hotwords
 
-We support session-level hotword when doing real-time ASR. You can use our HTTP interface to add, remove and modify/update a hotword list. You can also view the details of a hotword and and list all the available lists you've ever added.
+We support hotwords when doing real-time ASR. You can use our HTTP interface to add, remove and modify/update a hotword list. You can also view the details of a hotword and and list all the available lists you've ever added.
 
 Assume you are using an AI Box, and the IP address is 127.0.0.1. You should replace \<token\> with your own token.
 
@@ -179,12 +179,12 @@ curl http://127.0.0.1/api/v1/vocabularies/<vocabulary_id> \
 The output looks like:
 
 ``` sh
-{"vocabulary_id":"c48a8333-8589-4785-aa14-570219a3a467","user_id":"liuyi","name":"MT_update","description":"语音识别热词更新版","words":["朱元璋","朱允炆","朱棣"],"version":1,"create_time":"2024-04-01T07:41:03.966959","update_time":"2024-04-01T07:41:39.164577"}
+{"status_text":"success","vocabulary":{"vocabulary_id":"c48a8333-8589-4785-aa14-570219a3a467","user_id":"liuyi","name":"MT_update","description":"语音识别热词更新版","words":["朱元璋","朱允炆","朱棣"],"version":1,"create_time":"2024-04-01T07:41:03.966959","update_time":"2024-04-01T07:41:39.164577"}}
 ```
 
 ### List all
 
-Replace \<x\> and \<y\> with the desired page size and the target page. The target page is 0 and the page size is 10 by default.
+Replace \<x\> and \<y\> with the desired page size and the target page (start from 1). The target page is 1 and the page size is 10 by default.
 
 ``` sh
 curl http://127.0.0.1/api/v1/vocabularies?page_size=<x>&page=<y> \
@@ -195,7 +195,7 @@ curl http://127.0.0.1/api/v1/vocabularies?page_size=<x>&page=<y> \
 The output looks like:
 
 ``` sh
-{"vocabulary_count":2,"vocabulary_ids":["c48a8333-8589-4785-aa14-570219a3a467","18075a54-d625-4075-b46d-20b889a27a85"]}
+{"status_text":"success","vocabulary_count":2,"vocabulary_ids":["c48a8333-8589-4785-aa14-570219a3a467","18075a54-d625-4075-b46d-20b889a27a85"]}
 ```
 
 ### Python demo
@@ -206,23 +206,23 @@ We have shown how to manipulate the hotword lists using the Linux command *curl*
 python hotword/demo.py --url http://127.0.0.1/api/v1 --token <token> --hotword_list hotword/hotword_list.txt
 ```
 
-### ASR with session-level hotword
+### ASR with hotwords
 
-You can activate the session-level hotword using the vocab-id. The Python demo provides an interface to activate the session-level hotword.
+You can activate the hotword using the vocab-id. The Python demo provides an interface to activate the hotword.
 
 ``` sh
 # For local AI Box
 python python/realtime_asr_demo.py --mode local --url wss://127.0.0.1/api/v1/asr --token <token> --input_file hotword/hotword_demo.wav --vocab_id <vocab_id>
 ```
 
-We set the hotword list:
+The hotword list is:
     
     明思宗
     朱由检
     明光宗
     朱常洛
 
-Before using the session-level hotword, the result is: 
+Before using the hotword, the result is:
 
     明思宗朱有俭是崇祯皇帝，他是明代第16位皇帝是明光宗朱长洛之子。
 
