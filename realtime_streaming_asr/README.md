@@ -212,7 +212,12 @@ You can activate the hotword using the vocab-id. The Python demo provides an int
 
 ``` sh
 # For local AI Box
-python python/realtime_asr_demo.py --mode local --url wss://127.0.0.1/api/v1/asr --token <token> --input_file hotword/hotword_demo.wav --vocab_id <vocab_id>
+python python/realtime_asr_demo.py \
+    --mode local \
+    --url wss://127.0.0.1/api/v1/asr \
+    --token <token> \
+    --input_file hotword/hotword_demo.wav \
+    --vocab_id <vocab_id>
 ```
 
 The hotword list is:
