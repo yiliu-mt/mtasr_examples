@@ -127,6 +127,10 @@ class WsClient():
         Thread(target=run).start()
 
     def on_message(self, ws, message):
+        if json.loads(message)['header']['status'] != 1000:
+            print("Error occurs: {}".format(message))
+            return
+
         print(message)
         if json.loads(message)['header']['type'] == 'SentenceEnd':
             self.final_result += json.loads(message)['payload']['result'][0]['text']
