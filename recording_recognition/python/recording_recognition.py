@@ -1,7 +1,8 @@
 import time
+from http_api import *
 
 
-endpoint = "service_url"
+endpoint = "https://api.mthreads.com/asr-dev-apis/api/v1/asr"
 token = "your_token"
 
 config = {
@@ -41,7 +42,7 @@ def check_result(result):
 # upload using URL
 try:
     config['audio_type'] = 'url'
-    response = submit_task(config, url=long_audio_url, endpoint=endpoint, token=token)
+    response = submit_task(config, url=audio_url, endpoint=endpoint, token=token)
     while True:
         result = query_result(response['task_id'], endpoint=endpoint, token=token)
         if check_result(result):
