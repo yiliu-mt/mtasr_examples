@@ -1,4 +1,5 @@
 # coding:utf-8
+import argparse
 import time
 import wave
 import json
@@ -8,59 +9,67 @@ import websocket
 from functools import partial
 from threading import Thread
 
-URL = "wss://api.mthreads.com/api/v1/asr"
+# 默认WebSocket地址
+DEFAULT_URL = "wss://api.mthreads.com/api/v1/asr"
 
-# 鉴权token
-TOKEN = None
-# TOKEN = "YOUR_TOKEN"
+# 默认鉴权token
+DEFAULT_TOKEN = "YOUR_TOKEN"
 
-# 在此使用您的音频
-FILE_PATH = "demo.wav"
-# FILE_PATH = "YOUR_WAV_FILE_PATH.wav"
+# 默认待识别文件路径
+DEFAULT_INPUT_FILE = 'demo.wav'
 
-# 相关配置
+# 是否使能标点
+ENABLE_PUNCTUATION = True
+
+# 是否使能ITN
+ENABLE_ITN = True
+
+# 热词ID
+VOCABULARY_ID = None
+
+# 是否流式输出中间结果
+SHOW_INTERMEDIATE_RESULT = True
+
+# 输出nbest
+NBEST = 1
+
+# 是否输出词级别信息
+SHOW_WORDS = True
+
+# 其他配置
 DOMAIN = "general"
 LANGUAGE = "cn"
 FORMAT = "pcm"
-VOCABULARY_ID = None
+SHOW_CONFIDENCE = False
 LM_ID = None
-ENABLE_PUNCTUATION = True
-ENABLE_ITN = True
 REMOVE_DISFLUENCY = False
 ENABLE_SPEAKER_INFO = False
-NBEST = 1
-SHOW_CONFIDENCE = False
-SHOW_WORDS = True
-SHOW_INTERMEDIATE_RESULT = True
 ENABLE_SEMANTIC_SENTENCE_DETECTION = False
 SPECIAL_WORD_FILTER = None
 
-# 保存所有识别结果
-final_result = ""
-
 class WsClient():
-    def __init__(self):
-        self.url = URL
-        self.appid = TOKEN if TOKEN is not None else str(uuid.uuid4().hex)
+    def __init__(self, args):
+        self.url = args.url
+        self.appid = str(uuid.uuid4().hex)
         self.config_signal = {
             "header":{
                 "appid": self.appid,
                 "type":"StartTranscription"
             },
             "payload":{
+                "enable_punctuation": args.enable_punctuation,
+                "enable_itn": args.enable_itn,
+                "vocabulary_id": args.vocabulary_id,
+                "nbest": args.nbest,
+                "show_words": args.show_words,
+                "show_intermediate_result": args.show_intermediate_result,
                 "format": FORMAT,
                 "domain": DOMAIN,
                 "language": LANGUAGE,
-                "vocabulary_id": VOCABULARY_ID,
                 "lm_id": LM_ID,
-                "enable_punctuation": ENABLE_PUNCTUATION,
-                "enable_itn": ENABLE_ITN,
                 "remove_disfluency": REMOVE_DISFLUENCY,
                 "enable_speaker_info": ENABLE_SPEAKER_INFO,
-                "nbest": NBEST,
-                "show_words": SHOW_WORDS,
                 "show_confidence": SHOW_CONFIDENCE,
-                "show_intermediate_result": SHOW_INTERMEDIATE_RESULT,
                 "enable_semantic_sentence_detection": ENABLE_SEMANTIC_SENTENCE_DETECTION,
                 "special_word_filter": SPECIAL_WORD_FILTER,
             }
@@ -72,17 +81,22 @@ class WsClient():
             }
         }
         self.ws_header = None
-        if TOKEN is not None:
-            self.ws_header = {"Authorization": TOKEN}
-                    
+
+        if args.token is not None and len(args.token) > 0:
+            if args.mode == "cloud":
+                self.ws_header = {"Authorization": args.token}
+            elif args.mode == "local":
+                self.url = '{}?token={}'.format(self.url, args.token)
+        self.final_result = ""
+
         # Log设置
         self.logger = logging.getLogger("RunLog")
         self.logger.setLevel(logging.INFO)
-    
+
     def on_open(self, ws, file_path):
         def run(*args):
             interval = 0.16   # 每一包160ms，发送一包后等待160ms继续发送下一包音频
-            frame_size = 5120  # 160ms音频所占字节数：16000 * 2 * 160 / 1000 = 5120
+            frame_size = int(interval * 2 * 16000)  # 160ms音频所占字节数：16000 * 2 * 160 / 1000 = 5120
 
             # 读取.wav音频文件
             # 得到音频的二进制数据
@@ -106,17 +120,20 @@ class WsClient():
                 # 为了模拟真实环境，您可将该行替换为：
                 # time.sleep(interval)
                 time.sleep(0.001)
-            
+
             # 发送尾包
             ws.send(json.dumps(self.end_signal))
 
         Thread(target=run).start()
 
     def on_message(self, ws, message):
-        global final_result
+        if json.loads(message)['header']['status'] != 1000:
+            print("Error occurs: {}".format(message))
+            return
+
         print(message)
         if json.loads(message)['header']['type'] == 'SentenceEnd':
-            final_result += json.loads(message)['payload']['result'][0]['text']
+            self.final_result += json.loads(message)['payload']['result'][0]['text']
 
     def on_error(self, ws, error):
         print("error: ", error)
@@ -140,7 +157,19 @@ class WsClient():
 
 
 if __name__ == "__main__":
-    ws_client = WsClient()
-    ws_client.send(FILE_PATH)
-    print('整体识别结果:\n{}'.format(final_result))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=["cloud", "local"], default="cloud", type=str, help="The authorization mode")
+    parser.add_argument("--url", default=DEFAULT_URL, type=str, help="The endpoint to connect to")
+    parser.add_argument("--token", default=DEFAULT_TOKEN, type=str, help="The authorization token")
+    parser.add_argument("--input_file", default=DEFAULT_INPUT_FILE, type=str, help="The input file path")
+    parser.add_argument("--enable_punctuation", type=lambda x: (str(x).lower() == 'true'), default=ENABLE_PUNCTUATION, help="Enable punctuation")
+    parser.add_argument("--enable_itn", type=lambda x: (str(x).lower() == 'true'), default=True, help="Enable ITN")
+    parser.add_argument("--vocabulary_id", type=str, default=VOCABULARY_ID, help="Use session-level hotword")
+    parser.add_argument("--show_intermediate_result", type=lambda x: (str(x).lower() == 'true'), default=True, help="Output the intermediate result")
+    parser.add_argument("--nbest", type=int, default=NBEST, help="Output the nbest results")
+    parser.add_argument("--show_words", type=lambda x: (str(x).lower() == 'true'), default=True, help="Output the word-level information in the result")
+    args = parser.parse_args()
+    ws_client = WsClient(args)
+    ws_client.send(args.input_file)
+    print('整体识别结果:\n{}'.format(ws_client.final_result))
 

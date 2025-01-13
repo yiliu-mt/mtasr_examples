@@ -16,9 +16,6 @@ file_path = "demo.wav"
 # The final result that concatenates all sentences together
 final_result = ""
 
-# The final result that concatenates all sentences together
-final_result = ""
-
 def slice_data(data, chunk_size):
     data_len = len(data)
     offset = 0
