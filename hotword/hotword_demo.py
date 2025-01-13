@@ -3,13 +3,13 @@ import requests
 import json
 
 
-DEFAULT_URL = "http://127.0.0.1/api/v1"
-DEFAULT_TOKEN = None
+DEFAULT_URL = "https://api.mthreads.com/asr-dev-apis/api/v1"
+DEFAULT_TOKEN = "your_token_here"
 DEFAULT_HOTWORD_LIST = "hotword/hotword_list.txt"
 
 
 def read_hotword_file(filename):
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding='utf-8') as f:
         word_list = [line.strip() for line in f]
     return word_list
 
@@ -105,11 +105,10 @@ def main():
     parser.add_argument("--token", type=str, default=DEFAULT_TOKEN, help="the authorization token")
     parser.add_argument("--hotword_list", type=str, default=DEFAULT_HOTWORD_LIST, help="the target hotword list")
     args = parser.parse_args()
-
     # Add a hotword list
     word_list = read_hotword_file(args.hotword_list)
+    #create a list
     vocab_id = add_vocab(args.url, args.token, word_list)
-
     # update a list
     # update the name
     vocab_id = update_vocab(args.url, args.token, vocab_id, name="test_new")
