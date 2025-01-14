@@ -103,3 +103,9 @@ def upload_done(taskid, audio_path, endpoint=None, token=None):
     log.warning("upload done finished")
     return response_json
 
+
+def check_result(result):
+    if result['status'] == 1000:
+        return True
+    return False
+

@@ -34,11 +34,6 @@ chunk_size = 1024 * 1024 * 1 # 1M
 audio_url = 'your_audio_url'
 audio_path = 'your_audio_path'
 
-def check_result(result):
-    if result['status'] == 1000:
-        return True
-    return False
-
 # upload using URL
 try:
     config['audio_type'] = 'url'
