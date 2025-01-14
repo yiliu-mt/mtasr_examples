@@ -1,12 +1,14 @@
 import argparse
 import requests
 import json
+import time
+from recording_recognition.python.http_api import *
 
 
 DEFAULT_URL = "https://api.mthreads.com/asr-dev-apis/api/v1"
 DEFAULT_TOKEN = "your_token_here"
-DEFAULT_HOTWORD_LIST = "hotword/hotword_list.txt"
-
+DEFAULT_HOTWORD_LIST = "demo/hotword_list.txt"
+audio_path = 'demo/hotword_test.wav'
 
 def read_hotword_file(filename):
     with open(filename, 'r', encoding='utf-8') as f:
@@ -99,6 +101,51 @@ def list_all_vocabularies(endpoint, token):
         return None
 
 
+def test_wav(endpoint, token, path, vocab_id):
+    config = {
+        "domain": "general",
+        "language": "cn",
+        "audio_type": "url",
+        "format": "wav",
+        "lm_id": None,
+        "vocabulary_id": vocab_id,
+        "enable_punctuation": True,
+        "enable_itn": True,
+        "remove_disfluency": False,
+        "enable_speaker_info": False,
+        "show_confidence": False,
+        "show_words": False,
+        "enable_semantic_sentence_detection": False,
+        "max_single_segment_time": -1,
+        "max_sentence_length": 5,
+        "min_paragraph_length": -1,
+        "max_paragraph_length": -1,
+        "special_word_filter": None,
+        "callback": None,
+        "enable_query": False,
+        "first_channel_only": False,
+        "channel_split": True,
+    }
+
+    # # upload using bianry
+    try:
+        config['audio_type'] = 'upload'
+        config["format"] = "wav"
+        # each chunk consists of 10 MB data
+        chunk_size = 1024 * 1024 * 10
+        response = submit_task(config, endpoint=endpoint, token=token)
+        task_id = response['task_id']
+        response = upload_data(task_id, audio_path, chunk_size, endpoint=endpoint, token=token)
+        response = upload_done(task_id, audio_path, endpoint=endpoint, token=token)
+        while True:
+            result = query_result(task_id, endpoint=endpoint, token=token)
+            if check_result(result):
+                break
+            time.sleep(1)
+    except Exception as e:
+        print("Error: {}".format(e))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", type=str, default=DEFAULT_URL, help="the endpoint of the hotword service")
@@ -122,6 +169,12 @@ def main():
 
     # list all vocabularies
     list_all_vocabularies(args.url, args.token)
+
+    # test wav
+    print("without hotword")
+    test_wav(args.url + '/asr', args.token, audio_path, None)
+    print("with hotword")
+    test_wav(args.url + '/asr', args.token, audio_path, vocab_id)
 
     # delete a list
     delete_vocab(args.url, args.token, vocab_id)
