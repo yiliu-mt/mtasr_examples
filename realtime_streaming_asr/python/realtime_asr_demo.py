@@ -10,7 +10,7 @@ from functools import partial
 from threading import Thread
 
 # 默认WebSocket地址
-DEFAULT_URL = "wss://api.mthreads.com/api/v1/asr"
+DEFAULT_URL = "wss://api.mthreads.com/asr-dev-apis/api/v1/asr"
 
 # 默认鉴权token
 DEFAULT_TOKEN = "YOUR_TOKEN"
@@ -84,7 +84,7 @@ class WsClient():
 
         if args.token is not None and len(args.token) > 0:
             if args.mode == "cloud":
-                self.ws_header = {"Authorization": args.token}
+                self.ws_header = {"Authorization": "Bearer " + args.token}
             elif args.mode == "local":
                 self.url = '{}?token={}'.format(self.url, args.token)
         self.final_result = ""
