@@ -36,9 +36,9 @@ Use this to run the demo:
 
 ``` sh
 # For cloud service
-python python/realtime_asr_demo.py --mode cloud --url wss://api.mthreads.com/api/v1/asr --token <token> --input_file python/demo.wav
+python python/realtime_asr_demo.py --url wss://aibook-api.mthreads.com:62220/api/v1/asr --token <token> --input_file python/demo.wav
 # For local AI Box
-python python/realtime_asr_demo.py --mode local --url wss://127.0.0.1/api/v1/asr --token <token> --input_file python/demo.wav
+python python/realtime_asr_demo.py --url wss://127.0.0.1/api/v1/asr --token <token> --input_file python/demo.wav
 ```
 
 You should use the correct URL of the service. In the script, you can control the speed of audio data transmission as per your requirement. The default script uses `time.sleep(0.001)` for rapid transmission. To simulate more realistic application scenarios, you can change this to `time.sleep(interval)`, where 'interval' represents the time in seconds (e.g., 0.16 for 160ms) between sending audio chunks.
