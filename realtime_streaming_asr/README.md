@@ -28,17 +28,15 @@ pip install websocket-client
 
 The example reads an audio and call the ASR service. Various options are listed in the very beginning of the example. You can change options as you like.
 
-> ***Note:*** To access the server, you may need to modify the URL and authorization token in the demo script. Set the token to `None` if no authorization is needed.
->
-> The authorization methods are different for the cloud service and the local AI Box. **You should always specify the mode you are using.** The default is the **cloud** mode.
+> ***Note:*** To access the server, you may need to modify the URL and authorization token in the demo script.
 
 Use this to run the demo:
 
 ``` sh
-# For cloud service
-python python/realtime_asr_demo.py --mode cloud --url wss://api.mthreads.com/api/v1/asr --token <token> --input_file python/demo.wav
-# For local AI Box
-python python/realtime_asr_demo.py --mode local --url wss://127.0.0.1/api/v1/asr --token <token> --input_file python/demo.wav
+python python/realtime_asr_demo.py \
+    --url wss://aibook-api.mthreads.com:62220/api/v1/asr \
+    --token "<token>" \
+    --input_file python/demo.wav
 ```
 
 You should use the correct URL of the service. In the script, you can control the speed of audio data transmission as per your requirement. The default script uses `time.sleep(0.001)` for rapid transmission. To simulate more realistic application scenarios, you can change this to `time.sleep(interval)`, where 'interval' represents the time in seconds (e.g., 0.16 for 160ms) between sending audio chunks.
@@ -203,7 +201,10 @@ The output looks like:
 We have shown how to manipulate the hotword lists using the Linux command *curl*. Here we also provide a Python demo to show how to do the same job. Details are in the code.
 
 ``` sh
-python hotword/demo.py --url http://127.0.0.1/api/v1 --token <token> --hotword_list hotword/hotword_list.txt
+python hotword/demo.py \
+    --url http://127.0.0.1/api/v1 \
+    --token "<token>" \
+    --hotword_list hotword/hotword_list.txt
 ```
 
 ### ASR with hotwords
@@ -211,13 +212,11 @@ python hotword/demo.py --url http://127.0.0.1/api/v1 --token <token> --hotword_l
 You can activate the hotword using the vocab-id. The Python demo provides an interface to activate the hotword.
 
 ``` sh
-# For local AI Box
 python python/realtime_asr_demo.py \
-    --mode local \
-    --url wss://127.0.0.1/api/v1/asr \
-    --token <token> \
+    --url wss://aibook-api.mthreads.com:62220/api/v1/asr \
+    --token "<token>" \
     --input_file hotword/hotword_demo.wav \
-    --vocabulary_id <vocab_id>
+    --vocabulary_id "<vocab_id>"
 ```
 
 The hotword list is:

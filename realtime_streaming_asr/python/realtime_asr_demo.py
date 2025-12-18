@@ -10,10 +10,10 @@ from functools import partial
 from threading import Thread
 
 # 默认WebSocket地址
-DEFAULT_URL = "wss://api.mthreads.com/asr-dev-apis/api/v1/asr"
+DEFAULT_URL = "wss://aibook-api.mthreads.com:62220/api/v1/asr"
 
 # 默认鉴权token
-DEFAULT_TOKEN = "YOUR_TOKEN"
+DEFAULT_TOKEN = None
 
 # 默认待识别文件路径
 DEFAULT_INPUT_FILE = 'demo.wav'
@@ -82,11 +82,11 @@ class WsClient():
         }
         self.ws_header = None
 
+        if args.token is None:
+            raise RuntimeError("Token is not specified")
+
         if args.token is not None and len(args.token) > 0:
-            if args.mode == "cloud":
-                self.ws_header = {"Authorization": "Bearer " + args.token}
-            elif args.mode == "local":
-                self.url = '{}?token={}'.format(self.url, args.token)
+            self.url = '{}?token={}'.format(self.url, args.token)
         self.final_result = ""
 
         # Log设置
@@ -158,16 +158,15 @@ class WsClient():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["cloud", "local"], default="cloud", type=str, help="The authorization mode")
     parser.add_argument("--url", default=DEFAULT_URL, type=str, help="The endpoint to connect to")
     parser.add_argument("--token", default=DEFAULT_TOKEN, type=str, help="The authorization token")
     parser.add_argument("--input_file", default=DEFAULT_INPUT_FILE, type=str, help="The input file path")
     parser.add_argument("--enable_punctuation", type=lambda x: (str(x).lower() == 'true'), default=ENABLE_PUNCTUATION, help="Enable punctuation")
-    parser.add_argument("--enable_itn", type=lambda x: (str(x).lower() == 'true'), default=True, help="Enable ITN")
+    parser.add_argument("--enable_itn", type=lambda x: (str(x).lower() == 'true'), default=ENABLE_ITN, help="Enable ITN")
     parser.add_argument("--vocabulary_id", type=str, default=VOCABULARY_ID, help="Use session-level hotword")
-    parser.add_argument("--show_intermediate_result", type=lambda x: (str(x).lower() == 'true'), default=True, help="Output the intermediate result")
+    parser.add_argument("--show_intermediate_result", type=lambda x: (str(x).lower() == 'true'), default=SHOW_INTERMEDIATE_RESULT, help="Output the intermediate result")
     parser.add_argument("--nbest", type=int, default=NBEST, help="Output the nbest results")
-    parser.add_argument("--show_words", type=lambda x: (str(x).lower() == 'true'), default=True, help="Output the word-level information in the result")
+    parser.add_argument("--show_words", type=lambda x: (str(x).lower() == 'true'), default=SHOW_WORDS, help="Output the word-level information in the result")
     args = parser.parse_args()
     ws_client = WsClient(args)
     ws_client.send(args.input_file)
